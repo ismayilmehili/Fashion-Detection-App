@@ -1,0 +1,141 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #808080;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.fashion_detection</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">androidx.annotation.Nullable</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.appcompat.app.AppCompatActivity</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">android.Manifest</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.content.Intent</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.content.pm.PackageManager</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.graphics.Bitmap</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.net.Uri</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.os.Bundle</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.provider.MediaStore</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.util.Log</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.view.View</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.Button</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.ImageView</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.TextView</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">java.io.IOException</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.nio.ByteBuffer</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.nio.ByteOrder</span><span class="s0">;</span>
+
+<span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity {</span>
+
+    <span class="s1">Button cameraButton</span><span class="s0">, </span><span class="s1">galleryButton</span><span class="s0">;</span>
+    <span class="s1">ImageView imageView</span><span class="s0">;</span>
+    <span class="s1">TextView resultTextView</span><span class="s0">;</span>
+    <span class="s0">int </span><span class="s1">imageSize = </span><span class="s2">128</span><span class="s0">;  </span><span class="s3">// Model input size</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) {</span>
+        <span class="s0">super</span><span class="s1">.onCreate(savedInstanceState)</span><span class="s0">;</span>
+        <span class="s1">setContentView(R.layout.activity_main)</span><span class="s0">;</span>
+
+        <span class="s3">// Initialize UI components</span>
+        <span class="s1">cameraButton = findViewById(R.id.button)</span><span class="s0">;</span>
+        <span class="s1">galleryButton = findViewById(R.id.button2)</span><span class="s0">;</span>
+        <span class="s1">imageView = findViewById(R.id.imageView)</span><span class="s0">;</span>
+        <span class="s1">resultTextView = findViewById(R.id.result)</span><span class="s0">;</span>
+
+        <span class="s3">// Handle Camera Button Click</span>
+        <span class="s1">cameraButton.setOnClickListener(view -&gt; {</span>
+            <span class="s0">if </span><span class="s1">(checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {</span>
+                <span class="s1">Intent cameraIntent = </span><span class="s0">new </span><span class="s1">Intent(MediaStore.ACTION_IMAGE_CAPTURE)</span><span class="s0">;</span>
+                <span class="s1">startActivityForResult(cameraIntent</span><span class="s0">, </span><span class="s2">3</span><span class="s1">)</span><span class="s0">;  </span><span class="s3">// Camera request code</span>
+            <span class="s1">} </span><span class="s0">else </span><span class="s1">{</span>
+                <span class="s1">requestPermissions(</span><span class="s0">new </span><span class="s1">String[]{Manifest.permission.CAMERA}</span><span class="s0">, </span><span class="s2">100</span><span class="s1">)</span><span class="s0">;  </span><span class="s3">// Request camera permission</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span><span class="s0">;</span>
+
+        <span class="s3">// Handle Gallery Button Click</span>
+        <span class="s1">galleryButton.setOnClickListener(view -&gt; {</span>
+            <span class="s1">Intent galleryIntent = </span><span class="s0">new </span><span class="s1">Intent(Intent.ACTION_PICK</span><span class="s0">, </span><span class="s1">MediaStore.Images.Media.EXTERNAL_CONTENT_URI)</span><span class="s0">;</span>
+            <span class="s1">startActivityForResult(galleryIntent</span><span class="s0">, </span><span class="s2">1</span><span class="s1">)</span><span class="s0">;  </span><span class="s3">// Gallery request code</span>
+        <span class="s1">})</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">onActivityResult(</span><span class="s0">int </span><span class="s1">requestCode</span><span class="s0">, int </span><span class="s1">resultCode</span><span class="s0">, </span><span class="s1">@Nullable Intent data) {</span>
+        <span class="s0">super</span><span class="s1">.onActivityResult(requestCode</span><span class="s0">, </span><span class="s1">resultCode</span><span class="s0">, </span><span class="s1">data)</span><span class="s0">;</span>
+
+        <span class="s0">if </span><span class="s1">(resultCode == RESULT_OK &amp;&amp; data != </span><span class="s0">null</span><span class="s1">) {</span>
+            <span class="s1">Bitmap image = </span><span class="s0">null;</span>
+
+            <span class="s0">try </span><span class="s1">{</span>
+                <span class="s3">// Handle camera input</span>
+                <span class="s0">if </span><span class="s1">(requestCode == </span><span class="s2">3 </span><span class="s1">&amp;&amp; data.getExtras() != </span><span class="s0">null</span><span class="s1">) {</span>
+                    <span class="s1">image = (Bitmap) data.getExtras().get(</span><span class="s4">&quot;data&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">}</span>
+
+                <span class="s3">// Handle gallery input</span>
+                <span class="s0">if </span><span class="s1">(requestCode == </span><span class="s2">1</span><span class="s1">) {</span>
+                    <span class="s1">Uri imageUri = data.getData()</span><span class="s0">;</span>
+                    <span class="s1">image = MediaStore.Images.Media.getBitmap(</span><span class="s0">this</span><span class="s1">.getContentResolver()</span><span class="s0">, </span><span class="s1">imageUri)</span><span class="s0">;</span>
+                <span class="s1">}</span>
+
+                <span class="s3">// Process and classify the image</span>
+                <span class="s0">if </span><span class="s1">(image != </span><span class="s0">null</span><span class="s1">) {</span>
+                    <span class="s1">imageView.setImageBitmap(image)</span><span class="s0">;</span>
+                    <span class="s1">image = Bitmap.createScaledBitmap(image</span><span class="s0">, </span><span class="s1">imageSize</span><span class="s0">, </span><span class="s1">imageSize</span><span class="s0">, false</span><span class="s1">)</span><span class="s0">;  </span><span class="s3">// Resize image for model</span>
+                    <span class="s1">classifyImage(image)</span><span class="s0">;</span>
+                <span class="s1">} </span><span class="s0">else </span><span class="s1">{</span>
+                    <span class="s1">Log.e(</span><span class="s4">&quot;MainActivity&quot;</span><span class="s0">, </span><span class="s4">&quot;No image captured or selected.&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">}</span>
+
+            <span class="s1">} </span><span class="s0">catch </span><span class="s1">(IOException e) {</span>
+                <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+                <span class="s1">Log.e(</span><span class="s4">&quot;MainActivity&quot;</span><span class="s0">, </span><span class="s4">&quot;Error loading image.&quot;</span><span class="s0">, </span><span class="s1">e)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+        <span class="s1">} </span><span class="s0">else </span><span class="s1">{</span>
+            <span class="s1">Log.e(</span><span class="s4">&quot;MainActivity&quot;</span><span class="s0">, </span><span class="s4">&quot;Operation canceled or no data returned.&quot;</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s3">// Classify the input image using the FashionDetection class</span>
+    <span class="s0">public void </span><span class="s1">classifyImage(Bitmap image) {</span>
+        <span class="s0">try </span><span class="s1">{</span>
+            <span class="s3">// Preprocess the image into ByteBuffer</span>
+            <span class="s1">ByteBuffer byteBuffer = ByteBuffer.allocateDirect(</span><span class="s2">4 </span><span class="s1">* imageSize * imageSize * </span><span class="s2">3</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s1">byteBuffer.order(ByteOrder.nativeOrder())</span><span class="s0">;</span>
+
+            <span class="s0">int</span><span class="s1">[] intValues = </span><span class="s0">new int</span><span class="s1">[imageSize * imageSize]</span><span class="s0">;</span>
+            <span class="s1">image.getPixels(intValues</span><span class="s0">, </span><span class="s2">0</span><span class="s0">, </span><span class="s1">image.getWidth()</span><span class="s0">, </span><span class="s2">0</span><span class="s0">, </span><span class="s2">0</span><span class="s0">, </span><span class="s1">image.getWidth()</span><span class="s0">, </span><span class="s1">image.getHeight())</span><span class="s0">;</span>
+            <span class="s0">for </span><span class="s1">(</span><span class="s0">int </span><span class="s1">pixel : intValues) {</span>
+                <span class="s1">byteBuffer.putFloat(((pixel &gt;&gt; </span><span class="s2">16</span><span class="s1">) &amp; </span><span class="s2">0xFF</span><span class="s1">) / </span><span class="s2">255.0f</span><span class="s1">)</span><span class="s0">; </span><span class="s3">// Red</span>
+                <span class="s1">byteBuffer.putFloat(((pixel &gt;&gt; </span><span class="s2">8</span><span class="s1">) &amp; </span><span class="s2">0xFF</span><span class="s1">) / </span><span class="s2">255.0f</span><span class="s1">)</span><span class="s0">;  </span><span class="s3">// Green</span>
+                <span class="s1">byteBuffer.putFloat((pixel &amp; </span><span class="s2">0xFF</span><span class="s1">) / </span><span class="s2">255.0f</span><span class="s1">)</span><span class="s0">;         </span><span class="s3">// Blue</span>
+            <span class="s1">}</span>
+
+            <span class="s3">// Use the FashionDetection class for classification</span>
+            <span class="s1">String result = FashionDetection.classifyFashionItem(</span><span class="s0">this, </span><span class="s1">byteBuffer)</span><span class="s0">;</span>
+            <span class="s1">resultTextView.setText(</span><span class="s4">&quot;Classified as: &quot; </span><span class="s1">+ result)</span><span class="s0">;</span>
+
+        <span class="s1">} </span><span class="s0">catch </span><span class="s1">(Exception e) {</span>
+            <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+            <span class="s1">Log.e(</span><span class="s4">&quot;MainActivity&quot;</span><span class="s0">, </span><span class="s4">&quot;Error during image classification.&quot;</span><span class="s0">, </span><span class="s1">e)</span><span class="s0">;</span>
+            <span class="s1">resultTextView.setText(</span><span class="s4">&quot;Error during classification.&quot;</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

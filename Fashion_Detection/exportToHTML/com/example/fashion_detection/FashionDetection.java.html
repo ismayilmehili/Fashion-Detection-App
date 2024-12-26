@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>FashionDetection.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+FashionDetection.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.fashion_detection</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">android.content.Context</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">org.tensorflow.lite.DataType</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">org.tensorflow.lite.support.tensorbuffer.TensorBuffer</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">com.example.fashion_detection.ml.FashionClassifier</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">java.io.IOException</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.nio.ByteBuffer</span><span class="s0">;</span>
+
+<span class="s0">public class </span><span class="s1">FashionDetection {</span>
+
+    <span class="s0">public static </span><span class="s1">String classifyFashionItem(Context context</span><span class="s0">, </span><span class="s1">ByteBuffer byteBuffer) {</span>
+        <span class="s0">try </span><span class="s1">{</span>
+            <span class="s2">// Load the TensorFlow Lite model</span>
+            <span class="s1">FashionClassifier model = FashionClassifier.newInstance(context)</span><span class="s0">;</span>
+
+            <span class="s2">// Prepare the input tensor</span>
+            <span class="s1">TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(</span><span class="s0">new int</span><span class="s1">[]{</span><span class="s3">1</span><span class="s0">, </span><span class="s3">128</span><span class="s0">, </span><span class="s3">128</span><span class="s0">, </span><span class="s3">3</span><span class="s1">}</span><span class="s0">, </span><span class="s1">DataType.FLOAT32)</span><span class="s0">;</span>
+            <span class="s1">inputFeature0.loadBuffer(byteBuffer)</span><span class="s0">;</span>
+
+            <span class="s2">// Run inference</span>
+            <span class="s1">FashionClassifier.Outputs outputs = model.process(inputFeature0)</span><span class="s0">;</span>
+            <span class="s1">TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer()</span><span class="s0">;</span>
+
+            <span class="s2">// Extract confidence scores</span>
+            <span class="s0">float</span><span class="s1">[] confidences = outputFeature0.getFloatArray()</span><span class="s0">;</span>
+            <span class="s0">int </span><span class="s1">maxPos = </span><span class="s3">0</span><span class="s0">;</span>
+            <span class="s0">float </span><span class="s1">maxConfidence = </span><span class="s3">0</span><span class="s0">;</span>
+            <span class="s0">for </span><span class="s1">(</span><span class="s0">int </span><span class="s1">i = </span><span class="s3">0</span><span class="s0">; </span><span class="s1">i &lt; confidences.length</span><span class="s0">; </span><span class="s1">i++) {</span>
+                <span class="s0">if </span><span class="s1">(confidences[i] &gt; maxConfidence) {</span>
+                    <span class="s1">maxConfidence = confidences[i]</span><span class="s0">;</span>
+                    <span class="s1">maxPos = i</span><span class="s0">;</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+
+            <span class="s2">// Class labels (ensure these match your dataset labels)</span>
+            <span class="s1">String[] classNames = {</span>
+                    <span class="s4">&quot;Accessories&quot;</span><span class="s0">, </span><span class="s4">&quot;Apparel Set&quot;</span><span class="s0">, </span><span class="s4">&quot;Bags&quot;</span><span class="s0">, </span><span class="s4">&quot;Bath and Body&quot;</span><span class="s0">, </span><span class="s4">&quot;Beauty Accessories&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Belts&quot;</span><span class="s0">, </span><span class="s4">&quot;Bottomwear&quot;</span><span class="s0">, </span><span class="s4">&quot;Cufflinks&quot;</span><span class="s0">, </span><span class="s4">&quot;Dress&quot;</span><span class="s0">, </span><span class="s4">&quot;Eyes&quot;</span><span class="s0">, </span><span class="s4">&quot;Eyewear&quot;</span><span class="s0">, </span><span class="s4">&quot;Flip Flops&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Fragrance&quot;</span><span class="s0">, </span><span class="s4">&quot;Free Gifts&quot;</span><span class="s0">, </span><span class="s4">&quot;Gloves&quot;</span><span class="s0">, </span><span class="s4">&quot;Hair&quot;</span><span class="s0">, </span><span class="s4">&quot;Headwear&quot;</span><span class="s0">, </span><span class="s4">&quot;Home Furnishing&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Innerwear&quot;</span><span class="s0">, </span><span class="s4">&quot;Jewellery&quot;</span><span class="s0">, </span><span class="s4">&quot;Lips&quot;</span><span class="s0">, </span><span class="s4">&quot;Loungewear and Nightwear&quot;</span><span class="s0">, </span><span class="s4">&quot;Makeup&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Mufflers&quot;</span><span class="s0">, </span><span class="s4">&quot;Nails&quot;</span><span class="s0">, </span><span class="s4">&quot;Perfumes&quot;</span><span class="s0">, </span><span class="s4">&quot;Sandal&quot;</span><span class="s0">, </span><span class="s4">&quot;Saree&quot;</span><span class="s0">, </span><span class="s4">&quot;Scarves&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Shoe Accessories&quot;</span><span class="s0">, </span><span class="s4">&quot;Shoes&quot;</span><span class="s0">, </span><span class="s4">&quot;Skin&quot;</span><span class="s0">, </span><span class="s4">&quot;Skin Care&quot;</span><span class="s0">, </span><span class="s4">&quot;Socks&quot;</span><span class="s0">, </span><span class="s4">&quot;Sports Accessories&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Sports Equipment&quot;</span><span class="s0">, </span><span class="s4">&quot;Stoles&quot;</span><span class="s0">, </span><span class="s4">&quot;Ties&quot;</span><span class="s0">, </span><span class="s4">&quot;Topwear&quot;</span><span class="s0">, </span><span class="s4">&quot;Umbrellas&quot;</span><span class="s0">, </span><span class="s4">&quot;Vouchers&quot;</span><span class="s0">,</span>
+                    <span class="s4">&quot;Wallets&quot;</span><span class="s0">, </span><span class="s4">&quot;Watches&quot;</span><span class="s0">, </span><span class="s4">&quot;Water Bottle&quot;</span><span class="s0">, </span><span class="s4">&quot;Wristbands&quot;</span>
+            <span class="s1">}</span><span class="s0">;</span>
+
+            <span class="s2">// Release model resources</span>
+            <span class="s1">model.close()</span><span class="s0">;</span>
+
+            <span class="s2">// Return the predicted class name</span>
+            <span class="s0">return </span><span class="s1">classNames[maxPos]</span><span class="s0">;</span>
+
+        <span class="s1">} </span><span class="s0">catch </span><span class="s1">(IOException e) {</span>
+            <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+            <span class="s0">return </span><span class="s4">&quot;Error loading model.&quot;</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>
